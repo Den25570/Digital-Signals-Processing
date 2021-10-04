@@ -1,4 +1,5 @@
 ﻿using LiveCharts;
+using LiveCharts.Configurations;
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
@@ -19,13 +20,14 @@ namespace DigitalSignals
 {
     public partial class MainWindow : Window
     {
+        public SeriesCollection DeltaRTSCollection { get; set; }
+        public SeriesCollection DeltaACollection { get; set; }
         public SeriesCollection PhaseDeltaCollection { get; set; }
-        public SeriesCollection FrequencyDeltaCollection { get; set; }
-        public SeriesCollection AmplitudeDeltaCollection { get; set; }
-        public SeriesCollection PolyHarmonicSignalCollection { get; set; }
-        public SeriesCollection PolyHarmonicSignalDeltaCollection { get; set; }
 
-        private const int _n = 524;
+        private const int N = 524;
+        private const int K = N / 4;
+        private const float Phase = MathF.PI / 2;
+        private const float Step = (N / 4) / 8;
 
         public MainWindow()
         {
@@ -38,15 +40,49 @@ namespace DigitalSignals
 
         public void GenerateData()
         {
-            // A
-            var phases = new List<float>() {
-                MathF.PI / 3,
-                3 * MathF.PI / 4,
-                2 * MathF.PI,
-                MathF.PI,
-                MathF.PI / 6 };
+            
+            var deltaRmsCollection = new ChartValues<Point>();
+            var deltaACollection = new ChartValues<Point>();
+            for (float M = K; M < 2*N; M += Step)
+            {
+                var range = HarmonicSignal.GetSignalRange(N, (int)M);
+                var rms = HarmonicSignal.RootMeanSquare(range);
+                var rmsd = HarmonicSignal.RootMeanSquareDeviation(range, rms);
+                var dft = HarmonicSignal.DiscreteFourierTransform(range);
+                var test = range.Max();
+                var aRange = HarmonicSignal.DiscreteFourierTransformAmplitude(dft);
+                var deltaRms = MathF.Abs(0.707f - rms);
+                var deltaA = 1f - aRange.Sum();
+                deltaRmsCollection.Add(new Point(M, deltaRms));
+                deltaACollection.Add(new Point(M, deltaA));
+            }
+            DeltaRTSCollection = new SeriesCollection()
+            {
+                new LineSeries
+                {
+                  Configuration = new CartesianMapper<Point>()
+                    .X(point => point.X)
+                    .Y(point => point.Y),
+                  Title = "DeltaRms",
+                  Values = deltaRmsCollection,
+                  PointGeometry = null
+                }
+            };
+            DeltaACollection = new SeriesCollection()
+            {
+                new LineSeries
+                {
+                  Configuration = new CartesianMapper<Point>()
+                    .X(point => point.X)
+                    .Y(point => point.Y),
+                  Title = "DeltaA",
+                  Values = deltaACollection,
+                  PointGeometry = null
+                }
+            };
 
-            PhaseDeltaCollection = new SeriesCollection();
+
+            /*PhaseDeltaCollection = new SeriesCollection();
             foreach (var phase in phases)
             {
                 var values = new ChartValues<double> { };
@@ -150,7 +186,7 @@ namespace DigitalSignals
                 Values = polyDeltaValues,
                 PointGeometry = null,
                 Fill = Brushes.Transparent
-            });
+            });*/
         }
     }
 }

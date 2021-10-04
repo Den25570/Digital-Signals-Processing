@@ -13,16 +13,10 @@
         </Grid.ColumnDefinitions>
         <ScrollViewer Grid.ColumnSpan="2">
             <StackPanel Orientation="Vertical">
-                <TextBlock Margin="14,0,0,0" FontSize="24">A и f - постоянны, φ - переменная</TextBlock>
-                <charts:LineChart Height="350" SeriesCollection="{Binding PhaseDeltaCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
-                <TextBlock Margin="14,0,0,0" FontSize="24">A и φ - постоянны, f - переменная</TextBlock>
-                <charts:LineChart  Height="350" SeriesCollection="{Binding FrequencyDeltaCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="1" />
-                <TextBlock Margin="14,0,0,0" FontSize="24">f и φ - постоянны, A - переменная</TextBlock>
-                <charts:LineChart  Height="350" SeriesCollection="{Binding AmplitudeDeltaCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="1" />
-                <TextBlock Margin="14,0,0,0" FontSize="24">Полигармонический сигнал</TextBlock>
-                <charts:LineChart  Height="350" SeriesCollection="{Binding PolyHarmonicSignalCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="1" />
-                <TextBlock Margin="14,0,0,0" FontSize="24">Полигармонический сигнал изменяемый по линейному закону</TextBlock>
-                <charts:LineChart  Height="350" SeriesCollection="{Binding PolyHarmonicSignalDeltaCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="1" />
+                <TextBlock Margin="14,0,0,0" FontSize="24">RMS</TextBlock>
+                <charts:LineChart Height="350" SeriesCollection="{Binding DeltaRTSCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                <TextBlock Margin="14,0,0,0" FontSize="24">A</TextBlock>
+                <charts:LineChart Height="350" SeriesCollection="{Binding DeltaACollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
             </StackPanel>
         </ScrollViewer>
     </Grid>
