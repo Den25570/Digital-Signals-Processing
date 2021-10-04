@@ -12,6 +12,10 @@ namespace DigitalSignals
         {
             return MathF.Sin(2 * MathF.PI  * n / N);
         }
+        public static float GetHarmonicSignalPhase(float n, float N, float phase)
+        {
+            return MathF.Sin(2 * MathF.PI * n / N + phase);
+        }
 
         public static List<float> GetSignalRange(int N, int M)
         {
@@ -19,6 +23,15 @@ namespace DigitalSignals
             for (int i = 0; i < M; i++)
             {
                 range.Add(GetHarmonicSignal(i, N));
+            }
+            return range;
+        }
+        public static List<float> GetSignalRangePhase(int N, int M, float phase)
+        {
+            var range = new List<float>();
+            for (int i = 0; i < M; i++)
+            {
+                range.Add(GetHarmonicSignalPhase(i, N, phase));
             }
             return range;
         }

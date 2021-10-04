@@ -13,10 +13,14 @@
         </Grid.ColumnDefinitions>
         <ScrollViewer Grid.ColumnSpan="2">
             <StackPanel Orientation="Vertical">
-                <TextBlock Margin="14,0,0,0" FontSize="24">RMS</TextBlock>
+                <TextBlock Margin="14,0,0,0" FontSize="24">Delta RMS</TextBlock>
                 <charts:LineChart Height="350" SeriesCollection="{Binding DeltaRTSCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
-                <TextBlock Margin="14,0,0,0" FontSize="24">A</TextBlock>
+                <TextBlock Margin="14,0,0,0" FontSize="24">Delta amplitudes</TextBlock>
                 <charts:LineChart Height="350" SeriesCollection="{Binding DeltaACollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                <TextBlock Margin="14,0,0,0" FontSize="24">Delta RMS - 2</TextBlock>
+                <charts:LineChart Height="350" SeriesCollection="{Binding PhaseDeltaRTSCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                <TextBlock Margin="14,0,0,0" FontSize="24">Delta amplitudes - 2</TextBlock>
+                <charts:LineChart Height="350" SeriesCollection="{Binding PhaseDeltaACollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
             </StackPanel>
         </ScrollViewer>
     </Grid>
