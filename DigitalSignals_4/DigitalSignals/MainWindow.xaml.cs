@@ -55,6 +55,7 @@ namespace DigitalSignals
             var noiseA = HarmonicSignal.Noise(harmonicSignalParams, noiseSize);
             var noiseB = HarmonicSignal.Noise(harmonicSignalParams, noiseSize);
             var noiseCorrelationFunction = HarmonicSignal.CrossCorrelation(noiseA, noiseA, noiseSize);
+            var noiseCorrelationFunctionFFT = HarmonicSignal.CrossCorrelationFFT(noiseA, noiseA, noiseSize);
 
             /*var medianFiltered = HarmonicSignal.MedianFilter(harmonicSignal, 5);
             var medianAverageFiltered = HarmonicSignal.MedianAverage(harmonicSignal, 9);
@@ -121,6 +122,12 @@ namespace DigitalSignals
                     PointGeometry = null,
                     Fill = Brushes.Transparent
                 },
+                new LineSeries()
+                {
+                    Values = new ChartValues<double>(noiseCorrelationFunctionFFT),
+                    PointGeometry = null,
+                    Fill = Brushes.Transparent
+                }
             };
         }
     }
