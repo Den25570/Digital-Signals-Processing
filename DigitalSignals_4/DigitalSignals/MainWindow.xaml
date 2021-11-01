@@ -1,0 +1,44 @@
+﻿<Window x:Class="DigitalSignals.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:charts="clr-namespace:DigitalSignals.Plots"
+        mc:Ignorable="d"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="MainWindow" Height="768" Width="1368">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition Width="0*"/>
+        </Grid.ColumnDefinitions>
+
+        <TabControl x:Name="tabControl">
+            <TabItem Header="Гармонический сигнал">
+                <TabControl x:Name="tabControl1">
+                    <TabItem Header="Корреляция синусоид">
+                        <Grid Background="#FFE5E5E5">
+                            <Grid Background="#FFE5E5E5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <charts:LineChart SeriesCollection="{Binding HarmonicSignalCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="0" Margin="0,0,0,348" />
+                                <charts:LineChart SeriesCollection="{Binding CrossCorrelationFunctionCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="0" Margin="0,348,0,0" />
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+                    <TabItem Header="Корреляция случайных значений">
+                        <Grid Background="#FFE5E5E5">
+                            <Grid Background="#FFE5E5E5">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <charts:LineChart SeriesCollection="{Binding HarmonicSignalNoiseCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="0" Margin="0,0,0,348" />
+                                <charts:LineChart SeriesCollection="{Binding CrossCorrelationNoiseFunctionCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="0" Margin="0,348,0,0" />
+                            </Grid>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>
