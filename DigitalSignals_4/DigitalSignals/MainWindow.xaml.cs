@@ -2,6 +2,7 @@
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -24,6 +25,10 @@ namespace DigitalSignals
         public SeriesCollection HarmonicSignalNoiseCollection { get; set; }
         public SeriesCollection CrossCorrelationFunctionCollection { get; set; }
         public SeriesCollection CrossCorrelationNoiseFunctionCollection { get; set; }
+
+        public string timeToCrossCorr { get; set; }
+
+        public string timeToCrossCorrFFT { get; set; }
 
         private const int _n = 524;
 
@@ -50,21 +55,28 @@ namespace DigitalSignals
             var harmonicSignal = HarmonicSignal.GenerateHarmonicSignal(harmonicSignalParams, size);
             var harmonicSignalNoise = HarmonicSignal.GenerateHarmonicSignalWithNoise(harmonicSignalParams, size);
             var correlationFunction = HarmonicSignal.CrossCorrelation(harmonicSignal, harmonicSignalNoise, size);
-            var correlationFunctionFFT = HarmonicSignal.CrossCorrelationFFT(harmonicSignal, harmonicSignalNoise, size);
+            var correlationFunctionFFT = HarmonicSignal.CrossCorrelationFFT(harmonicSignal, harmonicSignalNoise, size, harmonicSignalParams.N);
 
             var noiseA = HarmonicSignal.Noise(harmonicSignalParams, noiseSize);
-            var noiseB = HarmonicSignal.Noise(harmonicSignalParams, noiseSize);
             var noiseCorrelationFunction = HarmonicSignal.CrossCorrelation(noiseA, noiseA, noiseSize);
-            var noiseCorrelationFunctionFFT = HarmonicSignal.CrossCorrelationFFT(noiseA, noiseA, noiseSize);
+            var noiseCorrelationFunctionFFT = HarmonicSignal.AutoCrossCorrelationFFT(noiseA, noiseSize, noiseSize);
 
-            /*var medianFiltered = HarmonicSignal.MedianFilter(harmonicSignal, 5);
-            var medianAverageFiltered = HarmonicSignal.MedianAverage(harmonicSignal, 9);
-            var parabolaDegree4Filtered = HarmonicSignal.ParabolaDegree4(harmonicSignal);
+            var watch = Stopwatch.StartNew();
+            for (int i = 0; i < 100; i++)
+            {
+                var tmp = HarmonicSignal.CrossCorrelation(noiseA, noiseA, noiseSize);
+            }
+            watch.Stop();
+            timeToCrossCorr = watch.ElapsedMilliseconds.ToString() + "ms";
 
-            var harmonicSignalSpecter = HarmonicSignal.FourierTransform(size, harmonicSignal.Select(x => new Complex(x, 0)).ToList());
-            var medianFilteredSpecter = HarmonicSignal.FourierTransform(size, medianFiltered.Select(x => new Complex(x, 0)).ToList());
-            var medianAverageFilteredSpecter = HarmonicSignal.FourierTransform(size, medianAverageFiltered.Select(x => new Complex(x, 0)).ToList());
-            var parabolaDegree4FilteredSpecter = HarmonicSignal.FourierTransform(size, parabolaDegree4Filtered.Select(x => new Complex(x, 0)).ToList());*/
+            watch.Restart();
+            for (int i = 0; i < 100; i++)
+            {
+                var tmp = HarmonicSignal.AutoCrossCorrelationFFT(noiseA, noiseSize, noiseSize);
+            }
+            watch.Stop();
+            timeToCrossCorrFFT = watch.ElapsedMilliseconds.ToString() + "ms";
+
 
             HarmonicSignalCollection = new SeriesCollection()
             {
@@ -92,10 +104,10 @@ namespace DigitalSignals
                 },
                 new LineSeries()
                 {
-                    Values = new ChartValues<double>(correlationFunctionFFT),
+                    Values = new ChartValues<double>(correlationFunction),
                     PointGeometry = null,
                     Fill = Brushes.Transparent
-                },
+                }
             };
 
             HarmonicSignalNoiseCollection = new SeriesCollection()
@@ -124,7 +136,7 @@ namespace DigitalSignals
                 },
                 new LineSeries()
                 {
-                    Values = new ChartValues<double>(noiseCorrelationFunctionFFT),
+                    Values = new ChartValues<double>(noiseCorrelationFunction),
                     PointGeometry = null,
                     Fill = Brushes.Transparent
                 }

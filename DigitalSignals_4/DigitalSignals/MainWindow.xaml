@@ -13,7 +13,7 @@
         </Grid.ColumnDefinitions>
 
         <TabControl x:Name="tabControl">
-            <TabItem Header="Гармонический сигнал">
+            <TabItem Header="Кросс корреляция">
                 <TabControl x:Name="tabControl1">
                     <TabItem Header="Корреляция синусоид">
                         <Grid Background="#FFE5E5E5">
@@ -26,18 +26,22 @@
                             </Grid>
                         </Grid>
                     </TabItem>
-                    <TabItem Header="Корреляция случайных значений">
-                        <Grid Background="#FFE5E5E5">
-                            <Grid Background="#FFE5E5E5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                </Grid.ColumnDefinitions>
-                                <charts:LineChart SeriesCollection="{Binding HarmonicSignalNoiseCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="0" Margin="0,0,0,348" />
-                                <charts:LineChart SeriesCollection="{Binding CrossCorrelationNoiseFunctionCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="0" Margin="0,348,0,0" />
-                            </Grid>
-                        </Grid>
-                    </TabItem>
                 </TabControl>
+            </TabItem>
+            <TabItem Header="Авто корреляция">
+                <Grid Background="#FFE5E5E5">
+                    <Grid Background="#FFE5E5E5">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <charts:LineChart SeriesCollection="{Binding HarmonicSignalNoiseCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="0" Margin="0,91,0,252" />
+                        <charts:LineChart SeriesCollection="{Binding CrossCorrelationNoiseFunctionCollection, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" Grid.Column="0" Margin="0,471,0,-14" />
+                        <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Margin="10,10,0,0" Text="Время на прямое вычисление:" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                        <TextBlock x:Name="textBlock2" HorizontalAlignment="Left" Margin="10,30,0,0" Text="{Binding timeToCrossCorr, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                        <TextBlock x:Name="textBlock3" HorizontalAlignment="Left" Margin="10,50,0,0" Text="Время на быстрое вычисление:" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                        <TextBlock x:Name="textBlock4" HorizontalAlignment="Left" Margin="10,70,0,0" Text="{Binding timeToCrossCorrFFT, RelativeSource={RelativeSource AncestorType={x:Type Window}}}" TextWrapping="Wrap" VerticalAlignment="Top"/>
+                    </Grid>
+                </Grid>
             </TabItem>
         </TabControl>
     </Grid>

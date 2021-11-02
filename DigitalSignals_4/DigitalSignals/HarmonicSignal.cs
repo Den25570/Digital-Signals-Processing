@@ -14,7 +14,7 @@ namespace DigitalSignals
         {
             public float B1 { get; set; }
             public float B2 { get; set; }
-            public float N { get; set; }
+            public int N { get; set; }
         }
 
         public static List<double> GenerateHarmonicSignal(HarmonicSignalParams signalParams, int size)
@@ -48,70 +48,82 @@ namespace DigitalSignals
 
         public static List<double> CrossCorrelation(List<double> x, List<double> y, int maxDelay)
         {
-            double mx = x.Average();
-            double my = y.Average();
-            double sx = x.Sum(xi => (xi - mx) * (xi - mx));
-            double sy = y.Sum(yi => (yi - my) * (yi - my));
-            double denom = Math.Sqrt(sx * sy);
-
-            return Enumerable.Range(-maxDelay, maxDelay * 2).Select(delay =>
+            return Enumerable.Range(-maxDelay * 2, maxDelay * 4).Select(delay =>
             {
                 double sxy = 0;
+                double mx = x.Average();
+                double my = y.Average();
                 for (int i = 0; i < x.Count; i++)
                 {
                     double yVal = i + delay < 0 || i + delay >= x.Count ? 0 : y[i + delay];
                     sxy += (x[i] - mx) * (yVal - my);
                 }
-                return sxy / denom;
+                return sxy / Math.Sqrt(x.Sum(xi => (xi - mx) * (xi - mx)) * y.Sum(yi => (yi - my) * (yi - my)));
             }).ToList();
         }
 
-        public static List<double> CrossCorrelationFFT(List<double> x, List<double> y, int maxDelay)
+        public static double[] AutoCrossCorrelationFFT(List<double> x, int maxDelay, int N)
         {
-            var zeroes = Enumerable.Repeat(0.0, x.Count);
-            var x_padded = x.Concat(zeroes);
-            var y_padded = y.Concat(zeroes);
+            var x_c = new double[x.Count * 2];
+            double[] tSin = new double[x_c.Length];
+            for (int i = 0; i < x_c.Length; i++) tSin[i] = Math.Sin(2 * Math.PI * i / x_c.Length);
+            for (int i = 0; i < x.Count; i++)  x_c[i] = x[i];
+            var xfft = FFT(x_c.Length, x_c, tSin);
+            var xyfft = new Complex[xfft.Length];
+            for (int i = 0; i < xfft.Length; i++) xyfft[i] = xfft[i] * Complex.Conjugate(xfft[i]) / N;
+            var result = IFFT(xfft.Length, xyfft, tSin);
 
-            var x_c = x_padded.Select(x => new Complex(x, 0)).ToList();
-            var y_c = y_padded.Select(y => new Complex(y, 0)).ToList();
-
-            var xfft = FFT(x_c.Count, x_c);
-            var yfft = FFT(y_c.Count, y_c).Select(c => Complex.Conjugate(c)).ToList();
-            return IFFT(xfft.Select((x,i) => xfft[i] * yfft[i]).ToList());
+            return result;
         }
 
-        public static List<Complex> FFT(int N, List<Complex> signal, bool isInvers = false)
+        public static double[] CrossCorrelationFFT(List<double> x, List<double> y, int maxDelay, int N)
         {
-            double[] tSin = Enumerable.Range(0, N).Select(value => Math.Sin(2 * Math.PI * value / N)).ToArray();
+            var x_c = new double[x.Count * 2];
+            var y_c = new double[y.Count * 2];
+            for (int i = 0; i < x.Count; i++)
+            {
+                x_c[i] = x[i];
+                y_c[i] = y[i];
+            }
+
+            double[] tSin = new double[x_c.Length];
+            for (int i = 0; i < x_c.Length; i++) tSin[i] = Math.Sin(2 * Math.PI * i / x_c.Length);
+            var xfft = FFT(x_c.Length, x_c, tSin);
+            var yfft = FFT(x_c.Length, y_c, tSin);
+            for (int i = 0; i < yfft.Length; i++) yfft[i] = Complex.Conjugate(yfft[i]);
+
+            var xyfft = new Complex[xfft.Length];
+            for (int i = 0; i < xfft.Length; i++) xyfft[i] = xfft[i] * yfft[i] / N;
+            var result = IFFT(xyfft.Length, xyfft, tSin);
+
+            return result;
+        }
+
+        public static Complex[] FFT(int N, double[] signal, double[] tSin)
+        {
             var result = new Complex[N];
-            Parallel.For(0, N, new ParallelOptions() { MaxDegreeOfParallelism = 4 }, (j) =>
+            Parallel.For(0, N, (j) =>
             {
                 for (int i = 0; i < N; i++)
                 {
-                    result[j] += signal[i] * new Complex(tSin[(i * j + N / 4) % N], (isInvers ? -1 : 1) * tSin[i * j % N]) / N;
+                    result[j] += signal[i] * new Complex(tSin[(i * j + N / 4) % N], tSin[i * j % N]);
                 }
             });
-            return result.ToList();
+            return result;
         }
 
-        public static List<double> IFFT(List<Complex> signal)
+        public static double[] IFFT(int N, Complex[] signal, double[] tSin)
         {
-            var N = signal.Count;
-            return Enumerable.Range(0, N).Select(n =>
-                Enumerable.Range(0, N).Select(R =>
-                    signal[R].Real * Math.Cos(2 * Math.PI * n * R / N) - signal[R].Imaginary * Math.Sin(2 * Math.PI * n * R / N))
-                .Sum())
-                .ToList();
-        }
-   /* return np.array([
-        np.sum(
-            [x_fft[R].real * np.cos(2 * np.pi * n * R / N) - x_fft[R].imag * np.sin(2 * np.pi * n * R / N) for R in range(int(N))]
-        ) 
-    for n in range(N)]) / N / A*/
-
-        public static List<double> IFFT(int N, List<Complex> signal)
-        {
-            return FFT(N, signal, true).Select(c=> c.Real).ToList();
+            double[] result = new double[signal.Length];
+            Parallel.For(0, N, (n) =>
+            {
+                for (int R = 0; R < signal.Length; R++)
+                {
+                    result[(n + N / 2) % N] += signal[R].Real * tSin[(n * R + N / 4) % N] - signal[R].Imaginary * tSin[n * R % N];
+                }
+                result[(n + N / 2) % N] /= N;
+            });
+            return result;
         }
     }
 }
